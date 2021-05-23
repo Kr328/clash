@@ -7,8 +7,14 @@ import (
 	"net"
 	"time"
 
+	"github.com/Dreamacro/clash/common/cache"
 	C "github.com/Dreamacro/clash/constant"
 )
+
+const rejectCountLimit = 50
+const rejectDelay = time.Second * 30
+
+var rejectCounter = cache.NewLRUCache(cache.WithAge(10), cache.WithStale(false), cache.WithSize(128))
 
 type Reject struct {
 	*Base
@@ -16,6 +22,25 @@ type Reject struct {
 
 // DialContext implements C.ProxyAdapter
 func (r *Reject) DialContext(ctx context.Context, metadata *C.Metadata) (C.Conn, error) {
+	key := metadata.RemoteAddress()
+
+	count, existed := rejectCounter.Get(key)
+	if !existed {
+		count = 0
+	}
+
+	count = count.(int) + 1
+
+	rejectCounter.Set(key, count)
+
+	if count.(int) > rejectCountLimit {
+		c, _ := net.Pipe()
+
+		c.SetDeadline(time.Now().Add(rejectDelay))
+
+		return NewConn(c, r), nil
+	}
+
 	return NewConn(&NopConn{}, r), nil
 }
 

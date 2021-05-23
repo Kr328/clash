@@ -44,6 +44,7 @@ type Provider interface {
 	Type() ProviderType
 	Initial() error
 	Update() error
+	Destroy() error
 }
 
 // ProxyProvider interface
@@ -118,6 +119,13 @@ func (pp *proxySetProvider) Proxies() []C.Proxy {
 func (pp *proxySetProvider) ProxiesWithTouch() []C.Proxy {
 	pp.healthCheck.touch()
 	return pp.Proxies()
+}
+
+func (pp *proxySetProvider) Destroy() error {
+	pp.healthCheck.close()
+	pp.fetcher.Destroy()
+
+	return nil
 }
 
 func proxiesParse(buf []byte) (interface{}, error) {
@@ -234,6 +242,12 @@ func (cp *compatibleProvider) Proxies() []C.Proxy {
 func (cp *compatibleProvider) ProxiesWithTouch() []C.Proxy {
 	cp.healthCheck.touch()
 	return cp.Proxies()
+}
+
+func (cp *compatibleProvider) Destroy() error {
+	cp.healthCheck.close()
+
+	return nil
 }
 
 func stopCompatibleProvider(pd *CompatibleProvider) {

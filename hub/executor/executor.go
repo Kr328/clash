@@ -10,7 +10,6 @@ import (
 	"github.com/Dreamacro/clash/adapter/outboundgroup"
 	"github.com/Dreamacro/clash/adapter/provider"
 	"github.com/Dreamacro/clash/component/auth"
-	"github.com/Dreamacro/clash/component/dialer"
 	"github.com/Dreamacro/clash/component/profile"
 	"github.com/Dreamacro/clash/component/profile/cachefile"
 	"github.com/Dreamacro/clash/component/resolver"
@@ -111,6 +110,7 @@ func updateDNS(c *config.DNS) {
 	if !c.Enable {
 		resolver.DefaultResolver = nil
 		resolver.DefaultHostMapper = nil
+		resolver.DefaultLocalServer = nil
 		dns.ReCreateServer("", nil, nil)
 		return
 	}
@@ -141,6 +141,7 @@ func updateDNS(c *config.DNS) {
 
 	resolver.DefaultResolver = r
 	resolver.DefaultHostMapper = m
+	resolver.DefaultLocalServer = dns.NewLocalServer(r, m)
 
 	if err := dns.ReCreateServer(c.Listen, r, m); err != nil {
 		log.Errorln("Start DNS server error: %s", err.Error())
@@ -169,13 +170,13 @@ func updateGeneral(general *config.General, force bool) {
 	tunnel.SetMode(general.Mode)
 	resolver.DisableIPv6 = !general.IPv6
 
-	if general.Interface != "" {
-		dialer.DialHook = dialer.DialerWithInterface(general.Interface)
-		dialer.ListenPacketHook = dialer.ListenPacketWithInterface(general.Interface)
-	} else {
-		dialer.DialHook = nil
-		dialer.ListenPacketHook = nil
-	}
+	//if general.Interface == "" {
+	//	dialer.DialHook = nil
+	//	dialer.ListenPacketHook = nil
+	//} else {
+	//	dialer.DialHook = dialer.DialerWithInterface(general.Interface)
+	//	dialer.ListenPacketHook = dialer.ListenPacketWithInterface(general.Interface)
+	//}
 
 	if !force {
 		return

@@ -18,5 +18,8 @@ func NewSocket(target socks5.Addr, conn net.Conn, source C.Type) *context.ConnCo
 		metadata.SrcPort = port
 	}
 
+	metadata.RawSrcAddr = conn.RemoteAddr()
+	metadata.RawDstAddr = conn.LocalAddr()
+
 	return context.NewConnContext(conn, metadata)
 }

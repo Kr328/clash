@@ -99,7 +99,7 @@ func (h *HTTPVehicle) Read() ([]byte, error) {
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
-		DialContext:           dialer.DialContext,
+		DialContext:           dialer.DialTunnelContext,
 	}
 
 	client := http.Client{Transport: transport}

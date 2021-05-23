@@ -2,7 +2,6 @@ package rules
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/Dreamacro/clash/common/cache"
@@ -26,13 +25,13 @@ func (ps *Process) Match(metadata *C.Metadata) bool {
 	key := fmt.Sprintf("%s:%s:%s", metadata.NetWork.String(), metadata.SrcIP.String(), metadata.SrcPort)
 	cached, hit := processCache.Get(key)
 	if !hit {
-		srcPort, err := strconv.Atoi(metadata.SrcPort)
-		if err != nil {
-			processCache.Set(key, "")
-			return false
-		}
+		//srcPort, err := strconv.Atoi(metadata.SrcPort)
+		//if err != nil {
+		//	processCache.Set(key, "")
+		//	return false
+		//}
 
-		name, err := process.FindProcessName(metadata.NetWork.String(), metadata.SrcIP, srcPort)
+		name, err := process.FindPackageName(metadata)
 		if err != nil {
 			log.Debugln("[Rule] find process name %s error: %s", C.Process.String(), err.Error())
 		}

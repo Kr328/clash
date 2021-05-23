@@ -15,7 +15,7 @@ import (
 )
 
 func HandleConn(c net.Conn, in chan<- C.ConnContext, cache *cache.Cache) {
-	client := newClient(c.RemoteAddr(), in)
+	client := newClient(c.RemoteAddr(), c.LocalAddr(), in)
 	defer client.CloseIdleConnections()
 
 	conn := N.NewBufferedConn(c)
@@ -80,7 +80,12 @@ func HandleConn(c net.Conn, in chan<- C.ConnContext, cache *cache.Cache) {
 		if keepAlive {
 			resp.Header.Set("Proxy-Connection", "keep-alive")
 			resp.Header.Set("Connection", "keep-alive")
-			resp.Header.Set("Keep-Alive", "timeout=4")
+
+			if cache == nil {
+				resp.Header.Set("Keep-Alive", "timeout=600")
+			} else {
+				resp.Header.Set("Keep-Alive", "timeout=4")
+			}
 		}
 
 		resp.Close = !keepAlive

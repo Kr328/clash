@@ -72,6 +72,11 @@ func Providers() map[string]provider.ProxyProvider {
 // UpdateProxies handle update proxies
 func UpdateProxies(newProxies map[string]C.Proxy, newProviders map[string]provider.ProxyProvider) {
 	configMux.Lock()
+
+	for _, p := range providers {
+		p.Destroy()
+	}
+
 	proxies = newProxies
 	providers = newProviders
 	configMux.Unlock()

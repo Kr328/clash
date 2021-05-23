@@ -11,7 +11,7 @@ import (
 	C "github.com/Dreamacro/clash/constant"
 )
 
-func newClient(source net.Addr, in chan<- C.ConnContext) *http.Client {
+func newClient(rawSrc, rawDst net.Addr, in chan<- C.ConnContext) *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			// from http.DefaultTransport
@@ -27,7 +27,7 @@ func newClient(source net.Addr, in chan<- C.ConnContext) *http.Client {
 
 				left, right := net.Pipe()
 
-				in <- inbound.NewHTTP(address, source, right)
+				in <- inbound.NewHTTP(address, rawSrc, rawDst, right)
 
 				return left, nil
 			},
